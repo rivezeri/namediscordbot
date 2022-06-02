@@ -57,7 +57,7 @@ async def on_member_update(before, after):
             
             print("BIG INFRACTION")
 
-            with open("hall-of-shame.txt", "a+") as f:
+            with open("hall-of-shame.txt", "w+") as f:
                 f.write(after.name)
 
             await channel.send(random.choice(leagueMsgs))
@@ -83,6 +83,7 @@ async def on_message(message): # exploitable function
         return
     
     if message.content.startswith('/addMcJob'):
+
         await message.channel.send('Added McJob to waiting folder. Expect approval shortly.')
     
     if message.content.startswith('/forceAddMcJob'): # admin only
@@ -94,17 +95,30 @@ async def on_message(message): # exploitable function
     if message.content.startswith('/exploitable'):
         
         await message.channel.send('Sent!')
-    
-    if message.content.startswith('/redditMode'):
 
-        with open("redditMode.txt") as f:
-            find = f.readline()
+# enables / disables reddit mode
+    if message.content.startswith('/reddit'):
+        if message.author.id == '138214725715623936':
+            await message.channel.send("""Sorry. You don\'t have permission to edit this mode.
+            \nPlease say \"The dollar delicacy is real\" to disable.'""")
+            return
+
+        with open("redditMode.txt", "r+") as f:
+            find = f.read()
 
             if find == 'On':
+
+                f.seek(0)
+                f.truncate(0)
                 f.write('Off')
+                
                 await message.channel.send('Reddit mode has been *disabled*.')
             else:
+
+                f.seek(0)
+                f.truncate(0)
                 f.write('On')
+                
                 await message.channel.send('Reddit mode has been *enabled*.')
 
     if message.content.startswith('/setmain'):
@@ -113,13 +127,15 @@ async def on_message(message): # exploitable function
             f.write(str(message.channel.id))
 
         await message.channel.send('Broadcasts will now be sent in this channel.')
-    
-    if message.id == '138214725715623936':
+
+# checks if reddit mode is enabled, if enabled will automatically add upvote/downvote functionality
+    if str(message.author.id) == '138214725715623936':
         with open("redditMode.txt") as f:
-            find = f.readline()
+            find = f.read()
+            print(find == 'On')
             if find == 'On':
-                await message.add_reaction(':downvote:')
-                await message.add_reaction(':upvote:')
+                await message.add_reaction('<:upvote:385300941118898176>')
+                await message.add_reaction('<:downvote:385300951139090434>')
 
 
 
