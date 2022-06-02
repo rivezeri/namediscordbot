@@ -1,12 +1,10 @@
-from dotenv import load_dotenv
-load_dotenv()
-
 import os 
 import random
 import discord
 from discord.ext import commands
 from keepalive import keepAlive
 from discord import Spotify
+import time
 
 intents = discord.Intents.all()
 intents.members = True
@@ -32,46 +30,49 @@ async def on_ready():
 @client.event
 async def on_member_update(before, after):
     # await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=random.choice(status)))
-
     channel = client.get_channel()
 
     leagueMsgs = [ f"HEY {after.mention}, NICE GAME YOU'RE PLAYING THERE, LEAGUE. ",
     f"**LEAGUE ALERT**: {after.mention}",
-    F"ATTENTION CLIQUE: {after.mention} IS CURRENTLY PLAYING LEAGUE OF LEGENDS. THAT IS ALL."
+    f"**ATTENTION CLIQUE**: {after.mention} IS CURRENTLY PLAYING LEAGUE OF LEGENDS. THAT IS ALL.",
+    f"LEAGUE???? {after.mention} YOU COULD PLAY ANY GAME BUT YOU CHOOSE LEAGUE. GET EM BOYS",
+    f"{after.mention} <- STUPID",
+    f"{after.mention} NICE GAME IDIOT",
+    f"YOU HAVE TEN SECONDS TO CLOSE LEAGUE OF LEGENDS OR YOU WILL BE BANNED. THE COUNTDOWN BEGINS NOW. {after.mention}."
     ]
-
+    
+    # small head mode
     if after.activity != None:
-        print(after.name)
+        print(after.activities)
 
-        for activity in after.activities:
-            
-            messages = [ f"ATTENTION : **{after.mention}** IS CURRENTLY LISTENING TO {activity.artist.upper()}. MAKE FUN OF THEM",
-            f"HEY YOU ABSOLUTE BAFFOON **{after.mention}**, STOP LISTENING TO {activity.artist.upper()}",
-            f"PLAY A BETTER SONG {after.mention}, {activity.artist.upper()} REALLY?"
+        if str(after.activities) == '(<Game name=\'League of Legends\'>,)':
+            print("BIG INFRACTION")
+            try:
+                with open("hall-of-shame.txt", "a+") as f:
+                    f.write(after.name)
+
+                await channel.send(random.choice(leagueMsgs))
+
+            except discord.errors.Forbidden:
+                print("Not valid permissions")
+                after.send("")
+
+    for activity in after.activities:
+
+        if isinstance(activity, Spotify) and after.id == '' and activity.artist == 'Caravan Palace':
+            messages = [ f"ATTENTION : **{after.mention}** IS CURRENTLY LISTENING TO {activity.artist}. MAKE FUN OF {after.mention}",
+                f"HEY YOU ABSOLUTE BAFFOON **{after.mention}**, STOP LISTENING TO {activity.artist}",
+                f"PLAY A BETTER SONG {after.mention}, {activity.artist.upper()}",
+                f"ATTENTION CLIQUE. {after.mention} IS NOW LISTENING TO CARAVAN PALACE. HAVE A NICE DAY."
             ]
 
-            if isinstance(activity, Spotify) and after.name == 'justBen' and activity.artist == 'Caravan Palace':
-                print("INFRACTION")
-                with open("mcjobCounter.txt", "a+") as f:
-                    f.write(1)
-                
-                await channel.send(random.choice(messages))
+            print("INFRACTION")
+            with open("mcjobCounter.txt", "a+") as f:
+                f.write(1)
+            
+            await channel.send(random.choice(messages))
 
-        if len(after.activities) > 1:
-            print(after.activities[1].name)
-            if str(after.activities[1].name).lower() == "league of legends":
-                print("BIG INFRACTION")
-                try:
-                    with open("hall-of-shame.txt", "a+") as f:
-                        f.write(after.name)
 
-                    await channel.send(random.choice(leagueMsgs))
-
-                except discord.errors.Forbidden:
-                    print("Not valid permissions")
-                    after.send("")
-
-                print(after.activities[1])
 
 keepAlive()
-client.run(os.getenv('TOKEN')) 
+client.run(os.getenv['TOKEN']) 
