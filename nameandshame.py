@@ -75,4 +75,4 @@ async def on_member_update(before, after):
 
 
 keepAlive()
-client.run(os.getenv['TOKEN']) 
+client.run(os.environ['TOKEN']) 
