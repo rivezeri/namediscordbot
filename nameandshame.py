@@ -33,7 +33,7 @@ async def on_ready():
 async def on_member_update(before, after):
     # await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=random.choice(status)))
 
-    channel = client.get_channel(836753810965528578)
+    channel = client.get_channel()
 
     leagueMsgs = [ f"HEY {after.mention}, NICE GAME YOU'RE PLAYING THERE, LEAGUE. ",
     f"**LEAGUE ALERT**: {after.mention}",
