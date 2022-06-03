@@ -26,9 +26,11 @@ async def on_ready():
     
     for guild in client.guilds:
         for member in guild.members:
+            
             members += 1
 
     with open("members.txt", "w") as f:
+
         f.write(str(members))
 
 @client.event
@@ -128,7 +130,6 @@ async def on_message(message): # exploitable function
             print(find == 'On')
 
             if find == 'On':
-
                 await message.add_reaction('<:upvote:385300941118898176>')
                 await message.add_reaction('<:downvote:385300951139090434>')
     
@@ -152,6 +153,7 @@ async def on_message(message): # exploitable function
         linear = []
 
         for item in dirListing:
+
             linear.append(item)
     
         with open(str('/home/rive/bot/exploitables/tba/' + random.choice(linear)),'rb') as f:
