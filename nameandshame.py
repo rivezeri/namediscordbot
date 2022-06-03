@@ -154,13 +154,8 @@ async def on_message(message):
     if message.content.startswith('/exploitable'):
 
         dirListing = os.listdir('/home/rive/bot/exploitables/tba/')
-        linear = []
-
-        for item in dirListing:
-
-            linear.append(item)
     
-        with open(str('/home/rive/bot/exploitables/tba/' + random.choice(linear)),'rb') as f:
+        with open(str('/home/rive/bot/exploitables/tba/' + random.choice(dirListing)),'rb') as f:
 
             picture = discord.File(f)
             await message.channel.send(file=picture)
