@@ -53,7 +53,7 @@ async def on_member_update(before, after):
     
     ]
     
-    # small head mode
+    # small head mode, checks if playing league
     if after.activity != None:
         print(after.activities)
 
@@ -65,7 +65,8 @@ async def on_member_update(before, after):
                 f.write(after.name)
 
             await channel.send(random.choice(leagueMsgs))
-
+    
+    # checks if playing 'caravan palace' on spotify
     for activity in after.activities:
 
         if isinstance(activity, Spotify) and after.id == '138214725715623936' and activity.artist == 'Caravan Palace':
@@ -82,7 +83,7 @@ async def on_member_update(before, after):
             await channel.send(random.choice(messages))
 
 @client.event
-async def on_message(message): # exploitable function
+async def on_message(message):
 
     if message.author == client.user:
         return
@@ -133,6 +134,7 @@ async def on_message(message): # exploitable function
                 await message.add_reaction('<:upvote:385300941118898176>')
                 await message.add_reaction('<:downvote:385300951139090434>')
     
+    # adds image to directory
     if message.content.startswith('/addMcJob'):
 
         rand = random.randint(1,1000000)
@@ -147,6 +149,7 @@ async def on_message(message): # exploitable function
         else:
             await message.channel.send('Please add an attachment.')
     
+    # returns said image from directory.
     if message.content.startswith('/exploitable'):
 
         dirListing = os.listdir('/home/rive/bot/exploitables/tba/')
