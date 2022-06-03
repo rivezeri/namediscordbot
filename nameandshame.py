@@ -115,6 +115,7 @@ async def on_message(message):
                 
                 await message.channel.send('Reddit mode has been *enabled*.')
 
+    # sets a directory where the bot announces
     if message.content.startswith('/setmain'):
 
         with open("defaultChannel.txt", "w") as f:
