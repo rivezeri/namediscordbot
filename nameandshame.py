@@ -170,7 +170,6 @@ async def on_message(message):
                 a = f.read()
                 b = a.split()
                 for i in b:
-                    print(i)
                     if str(i) == str(message.mentions[0].id):
                         await message.channel.send('User already added.')
                         return
