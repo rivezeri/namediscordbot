@@ -182,6 +182,7 @@ async def on_message(message):
        except IndexError:
            await message.channel.send('Please @ mention the user.')
 
+    # remove a user from reddit mode.
     if message.content.startswith('/removeUser'):
         
         try:            
