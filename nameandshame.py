@@ -117,9 +117,9 @@ async def on_message(message):
     # if str(message.author.id) == '138214725715623936' and message.channel.id != "849730083434135614":
     with open("redditMode.txt") as f:
         find = f.read()
-        print(find == 'On')
 
         if find == 'On':
+            print(find == 'On')
             with open("users.txt") as g:
                 g = g.read()
                 h = g.split()
