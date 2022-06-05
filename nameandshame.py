@@ -189,12 +189,15 @@ async def on_message(message):
                 for line in lines:
                     if line.strip("\n") != str(message.mentions[0].id):
                         f.write(line)
+                    else:
                         check = True
 
                 if check:
                     await message.channel.send(f'The user {message.mentions[0]} has been removed.')
                 else:
                     await message.channel.send('Please remove a valid user.')
+                    
+                    
             
             # HOLY CRAP! only do this on small servers
 
