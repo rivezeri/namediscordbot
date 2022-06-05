@@ -1,10 +1,6 @@
 import os 
 import random
-import time
 import discord
-import uuid
-import requests
-import shutil
 from dotenv import load_dotenv
 from discord.ext import commands
 from keepalive import keepAlive
@@ -16,7 +12,6 @@ intents = discord.Intents.all()
 intents.members = True
 
 client = commands.Bot(command_prefix='/', intents=intents)
-
 
 @client.event
 async def on_ready():
@@ -33,6 +28,7 @@ async def on_ready():
 
         f.write(str(members))
 
+    
 @client.event
 async def on_member_update(before, after):
     
@@ -90,12 +86,11 @@ async def on_message(message):
 
     # enables / disables reddit mode
     if message.content.startswith('/reddit'):
-        if message.author.id == '138214725715623936':
 
-            await message.channel.send("""Sorry. You don\'t have permission to edit this mode.
-            \nPlease say \"The dollar delicacy is real\" to disable.'""")
-            
-            return
+        with open("users.txt", "r") as f:
+
+            a = f.read()
+            b = a.split()
 
         with open("redditMode.txt", "r+") as f:
             
@@ -124,28 +119,33 @@ async def on_message(message):
         await message.channel.send('Broadcasts will now be sent in this channel.')
 
     # checks if reddit mode is enabled, if enabled will automatically add upvote/downvote functionality
-    if str(message.author.id) == '138214725715623936' and message.channel.id != "849730083434135614":
+    # if str(message.author.id) == '138214725715623936' and message.channel.id != "849730083434135614":
+    with open("redditMode.txt") as f:
+        find = f.read()
+        print(find == 'On')
 
-        with open("redditMode.txt") as f:
-
-            find = f.read()
-            print(find == 'On')
-
-            if find == 'On':
-                await message.add_reaction('<:upvote:385300941118898176>')
-                await message.add_reaction('<:downvote:385300951139090434>')
-    
+        if find == 'On':
+            with open("users.txt") as g:
+                g = g.read()
+                h = g.split()
+                for i in h:
+                    if str(message.author.id) == str(i) and message.channel.id != "849730083434135614":
+                        await message.add_reaction('<:upvote:385300941118898176>')
+                        await message.add_reaction('<:downvote:385300951139090434>')
+        
     # adds image to directory
     if message.content.startswith('/addMcJob'):
 
-        rand = random.randint(1,1000000)
+        rand = random.randint(1,10000)
         if message.attachments:
 
             for attach in message.attachments:
 
-                await attach.save(f"/home/rive/bot/exploitables/tba/{str(rand)} {attach.filename}")
+                storage = f"{str(rand)}{str(rand)}{attach.filename}"
 
-            await message.channel.send('Your exploitable has been added.')
+                await attach.save(f"/home/rive/bot/exploitables/tba/{storage}")
+
+            await message.channel.send('Your exploitable has been added. Filename: ')
             
         else:
             await message.channel.send('Please add an attachment.')
@@ -159,8 +159,48 @@ async def on_message(message):
 
             picture = discord.File(f)
             await message.channel.send(file=picture)
+    
+    # will add the afflicted user to the unfun list
+    if message.content.startswith('/addUser'):
+       try:
+           if str(message.mentions[0].id) == str(client.user.id):
+                await message.channel.send('Don\'t even think about it.')
+                return
             
+           with open("users.txt", 'r+') as f:
+                a = f.read()
+                b = a.split()
+                for i in b:
+                    print(i)
+                    if str(i) == str(message.mentions[0].id):
+                        await message.channel.send('User already added.')
+                        return
 
+                f.write(f"{str(message.mentions[0].id)}\n")
+
+           await message.channel.send(f"The user {message.mentions[0]} Added.")
+
+       except IndexError:
+           await message.channel.send('Please @ mention the user.')
+
+    if message.content.startswith('/removeUser'):
+        
+        try:            
+            with open("users.txt", "r") as f:
+                lines = f.readlines()
+            
+            with open("users.txt", "w") as f:
+                
+                for line in lines:
+                    if line.strip("\n") != str(message.mentions[0].id):
+                        f.write(line)
+            
+            await message.channel.send(f'The user {message.mentions[0]} has been removed.')
+            
+            # HOLY CRAP! only do this on small servers
+
+        except IndexError:
+            await message.channel.send('Please @ mention the user to remove.')
 
 keepAlive()
 client.run(os.getenv('TOKEN'))
