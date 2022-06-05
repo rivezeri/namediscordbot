@@ -155,6 +155,7 @@ async def on_message(message):
         with open(str('/home/rive/bot/exploitables/tba/' + random.choice(dirListing)),'rb') as f:
 
             picture = discord.File(f)
+            await message.channel.send('Here is your exploitable:')
             await message.channel.send(file=picture)
     
     # will add the afflicted user to the unfun list
