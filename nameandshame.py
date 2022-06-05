@@ -196,8 +196,6 @@ async def on_message(message):
                     await message.channel.send(f'The user {message.mentions[0]} has been removed.')
                 else:
                     await message.channel.send('Please remove a valid user.')
-                    
-                    
             
             # HOLY CRAP! only do this on small servers
 
