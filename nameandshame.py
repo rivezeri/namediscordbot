@@ -31,6 +31,7 @@ async def on_ready():
     
 @client.event
 async def on_member_update(before, after):
+    
     '''Includes the LOL banner and Caravan Palace checker. Needed on member update for active checks.'''
     
     with open("defaultChannel.txt") as f:
@@ -81,7 +82,9 @@ async def on_member_update(before, after):
 
 @client.command()
 async def reddit(ctx):
+    
     '''Reddit toggle. Enables upvote/downvote on each enabled redditor.'''
+    
     with open("redditMode.txt", "r+") as f:
         find = f.read()
     
@@ -102,7 +105,9 @@ async def reddit(ctx):
 
 @client.command()
 async def setMain(ctx):
+    
     '''Sets the main channel to allow broadcasts.'''
+    
     with open("defaultChannel.txt", "w") as f:
         f.write(str(ctx.message.channel.id))
 
@@ -111,6 +116,7 @@ async def setMain(ctx):
 
 @client.command()
 async def addMcJob(ctx):
+    
     '''Adds McJob exploits to the alloted directory.'''
 
     if ctx.message.attachments:
@@ -129,7 +135,9 @@ async def addMcJob(ctx):
 
 @client.command()
 async def exploitable(ctx):
+    
     '''Calls an exploit randomly from the same directory.'''
+    
     dirListing = os.listdir('/home/rive/bot/exploitables/tba/')
 
     if len(dirListing) == 0:
@@ -139,13 +147,16 @@ async def exploitable(ctx):
     with open(str('/home/rive/bot/exploitables/tba/' + random.choice(dirListing)),'rb') as f:
 
         picture = discord.File(f)
+
         await ctx.send('Here is your exploitable:')
         await ctx.send(file=picture)
 
 
 @client.command()
 async def addRedditor(ctx):
+    
     '''Adds your wanted Redditor to a file, works in tandem with the reddit command.'''
+    
     try:
         if str(ctx.message.mentions[0].id) == str(client.user.id):
             await ctx.send('Don\'t even think about it.')
@@ -155,6 +166,7 @@ async def addRedditor(ctx):
             a = f.read()
             b = a.split()
             for i in b:
+
                 if str(i) == str(ctx.message.mentions[0].id):
                     await ctx.send('User already added.')
                     return
@@ -169,7 +181,9 @@ async def addRedditor(ctx):
 
 @client.command()
 async def removeRedditor(ctx):
+    
     '''Cuts the Redditor from the file. Disables the function to the user.'''
+    
     try:            
         with open("users.txt", "r") as f:
             lines = f.readlines()
@@ -198,7 +212,9 @@ async def removeRedditor(ctx):
 
 @client.command()
 async def restrictChannel(ctx):
+    
     '''Disallows reddit to run on the specific channel.'''
+    
     try:
         with open("restrictedChannels.txt",'r+') as f:
             a = f.read()
@@ -217,7 +233,9 @@ async def restrictChannel(ctx):
 
 @client.command()
 async def unrestrictChannel(ctx):
+    
     '''Unrestricts said channel. Inverse of above.'''
+
     try:            
         with open("restrictedChannels.txt", "r") as f:
             lines = f.readlines()
