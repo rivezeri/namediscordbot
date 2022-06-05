@@ -140,16 +140,19 @@ async def on_message(message):
 
                 await attach.save(f"/home/rive/bot/exploitables/tba/{storage}")
 
-            await message.channel.send('Your exploitable has been added. Filename: ')
+            await message.channel.send(f'Your exploitable has been added. Filename: {storage}.')
             
         else:
             await message.channel.send('Please add an attachment.')
     
     # returns said image from directory.
     if message.content.startswith('/exploitable'):
-
         dirListing = os.listdir('/home/rive/bot/exploitables/tba/')
-    
+
+        if len(dirListing) == 0:
+            await message.channel.send('The exploitable directory is currently empty.')
+            return
+        
         with open(str('/home/rive/bot/exploitables/tba/' + random.choice(dirListing)),'rb') as f:
 
             picture = discord.File(f)
@@ -157,6 +160,7 @@ async def on_message(message):
     
     # will add the afflicted user to the unfun list
     if message.content.startswith('/addUser'):
+
        try:
            if str(message.mentions[0].id) == str(client.user.id):
                 await message.channel.send('Don\'t even think about it.')
