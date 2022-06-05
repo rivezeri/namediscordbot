@@ -86,7 +86,7 @@ async def on_message(message):
 
     # enables / disables reddit mode
     if message.content.startswith('/reddit'):
-        
+
         with open("redditMode.txt", "r+") as f:
             
             find = f.read()
@@ -185,12 +185,16 @@ async def on_message(message):
                 lines = f.readlines()
             
             with open("users.txt", "w") as f:
-                
+                check = False
                 for line in lines:
                     if line.strip("\n") != str(message.mentions[0].id):
                         f.write(line)
-            
-            await message.channel.send(f'The user {message.mentions[0]} has been removed.')
+                        c = True
+
+                if check:
+                    await message.channel.send(f'The user {message.mentions[0]} has been removed.')
+                else:
+                    await message.send('Please remove a valid user.')
             
             # HOLY CRAP! only do this on small servers
 
