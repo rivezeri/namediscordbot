@@ -131,12 +131,11 @@ async def on_message(message):
     # adds image to directory
     if message.content.startswith('/addMcJob'):
 
-        rand = random.randint(1,10000)
         if message.attachments:
 
             for attach in message.attachments:
 
-                storage = f"{str(rand)}{str(rand)}{attach.filename}"
+                storage = f"{str(random.randint(1,1000))}{str(random.randint(1,10000))}{attach.filename}"
 
                 await attach.save(f"/home/rive/bot/exploitables/tba/{storage}")
 
