@@ -1,3 +1,3 @@
 # namediscordbot
 
-originally a fork from lol banner. the skeleton of the file is the same, however with much expanded functionality.
+keepalive.py is pulled from LOL-banner repo. Same with the lol banner idea, however modified duly. Credit where it's due.
