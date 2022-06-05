@@ -2,7 +2,7 @@ import os
 import random
 import discord
 from dotenv import load_dotenv
-from discord.ext import commands
+from discord.ext import commands, tasks
 from keepalive import keepAlive
 from discord import Spotify
 
@@ -11,7 +11,7 @@ load_dotenv()
 intents = discord.Intents.all()
 intents.members = True
 
-client = commands.Bot(command_prefix='/', intents=intents)
+client = commands.Bot(command_prefix='!', intents=intents)
 
 @client.event
 async def on_ready():
@@ -31,6 +31,7 @@ async def on_ready():
     
 @client.event
 async def on_member_update(before, after):
+    '''Includes the LOL banner and Caravan Palace checker. Needed on member update for active checks.'''
     
     with open("defaultChannel.txt") as f:
 
@@ -78,133 +79,192 @@ async def on_member_update(before, after):
 
             await channel.send(random.choice(messages))
 
-@client.event
-async def on_message(message):
+@client.command()
+async def reddit(ctx):
+    '''Reddit toggle. Enables upvote/downvote on each enabled redditor.'''
+    with open("redditMode.txt", "r+") as f:
+        find = f.read()
+    
+        if find == 'On':
+            f.seek(0)
+            f.truncate(0)
+            f.write('Off')
+            
+            await ctx.send('Reddit mode has been *disabled*.')
 
-    if message.author == client.user:
+        else:
+            f.seek(0)
+            f.truncate(0)
+            f.write('On')
+            
+            await ctx.send('Reddit mode has been *enabled*.')
+
+
+@client.command()
+async def setMain(ctx):
+    '''Sets the main channel to allow broadcasts.'''
+    with open("defaultChannel.txt", "w") as f:
+        f.write(str(ctx.message.channel.id))
+
+    await ctx.send('Broadcasts will now be sent in this channel.')
+
+
+@client.command()
+async def addMcJob(ctx):
+    '''Adds McJob exploits to the alloted directory.'''
+
+    if ctx.message.attachments:
+
+        for attach in ctx.message.attachments:
+
+            storage = f"{str(random.randint(1,1000))}{str(random.randint(1,10000))}{attach.filename}"
+
+            await attach.save(f"/home/rive/bot/exploitables/tba/{storage}")
+
+        await ctx.send(f'Your exploitable has been added. Filename: {storage}.')
+        
+    else:
+        await ctx.send('Please add an attachment.')
+
+
+@client.command()
+async def exploitable(ctx):
+    '''Calls an exploit randomly from the same directory.'''
+    dirListing = os.listdir('/home/rive/bot/exploitables/tba/')
+
+    if len(dirListing) == 0:
+        await ctx.send('The exploitable directory is currently empty.')
         return
 
-    # enables / disables reddit mode
-    if message.content.startswith('/reddit'):
+    with open(str('/home/rive/bot/exploitables/tba/' + random.choice(dirListing)),'rb') as f:
 
-        with open("redditMode.txt", "r+") as f:
-            
-            find = f.read()
+        picture = discord.File(f)
+        await ctx.send('Here is your exploitable:')
+        await ctx.send(file=picture)
 
-            if find == 'On':
-                f.seek(0)
-                f.truncate(0)
-                f.write('Off')
-                
-                await message.channel.send('Reddit mode has been *disabled*.')
+
+@client.command()
+async def addRedditor(ctx):
+    '''Adds your wanted Redditor to a file, works in tandem with the reddit command.'''
+    try:
+        if str(ctx.message.mentions[0].id) == str(client.user.id):
+            await ctx.send('Don\'t even think about it.')
+            return
+        
+        with open("users.txt", 'r+') as f:
+            a = f.read()
+            b = a.split()
+            for i in b:
+                if str(i) == str(ctx.message.mentions[0].id):
+                    await ctx.send('User already added.')
+                    return
+
+            f.write(f"{str(ctx.message.mentions[0].id)}\n")
+
+        await ctx.send(f"The user {ctx.message.mentions[0]} Added.")
+
+    except IndexError:
+        await ctx.send('Please @ mention the user.')
+
+
+@client.command()
+async def removeRedditor(ctx):
+    '''Cuts the Redditor from the file. Disables the function to the user.'''
+    try:            
+        with open("users.txt", "r") as f:
+            lines = f.readlines()
+        
+        with open("users.txt", "w") as f:
+            check = False
+            for line in lines:
+
+                if line.strip("\n") != str(ctx.message.mentions[0].id):
+                    f.write(line)
+
+                else:
+                    check = True
+
+            if check:
+                await ctx.send(f'The user {ctx.message.mentions[0]} has been removed.')
 
             else:
-                f.seek(0)
-                f.truncate(0)
-                f.write('On')
-                
-                await message.channel.send('Reddit mode has been *enabled*.')
+                await ctx.send('Please remove a valid user.')
+        
+        # HOLY CRAP! only do this on small servers
 
-    # sets a directory where the bot announces
-    if message.content.startswith('/setmain'):
+    except IndexError:
+        await ctx.send('Please @ mention the user to remove.')
 
-        with open("defaultChannel.txt", "w") as f:
-            f.write(str(message.channel.id))
 
-        await message.channel.send('Broadcasts will now be sent in this channel.')
+@client.command()
+async def restrictChannel(ctx):
+    '''Disallows reddit to run on the specific channel.'''
+    try:
+        with open("restrictedChannels.txt",'r+') as f:
+            a = f.read()
+            b = a.split()
+            for i in b:
+                if str(i) == str(ctx.message.channel.id):
+                    await ctx.send('Channel already restricted.')
+                    return
+            
+            f.write(f"{str(ctx.message.channel.id)}\n")
 
-    # checks if reddit mode is enabled, if enabled will automatically add upvote/downvote functionality
-    # if str(message.author.id) == '138214725715623936' and message.channel.id != "849730083434135614":
+            await ctx.send(f'The current channel \'{ctx.message.channel}\' has been restricted.')
+
+    except IndexError:
+        await ctx.send('Please select a channel to restrict.')
+
+@client.command()
+async def unrestrictChannel(ctx):
+    '''Unrestricts said channel. Inverse of above.'''
+    try:            
+        with open("restrictedChannels.txt", "r") as f:
+            lines = f.readlines()
+        
+        with open("restrictedChannels.txt", "w") as f:
+            check = False
+            for line in lines:
+
+                if line.strip("\n") != str(ctx.message.channel.id):
+                    f.write(line)
+
+                else:
+                    check = True
+
+            if check:
+                await ctx.send(f'The channel \'{ctx.message.channel}\' has been unrestricted.')
+
+            else:
+                await ctx.send('This channel was never restricted.')
+
+    except IndexError:
+        await ctx.send('Takes the current channel only.')
+
+@client.event
+async def on_message(message):
+    with open("restrictedChannels.txt") as f:
+        
+        a = f.read()
+        restricted = a.split()
+
     with open("redditMode.txt") as f:
         find = f.read()
 
-        if find == 'On':
-            print(find == 'On')
+        if str(find) == "On":
+
             with open("users.txt") as g:
+
                 g = g.read()
                 h = g.split()
+
                 for i in h:
-                    if str(message.author.id) == str(i) and message.channel.id != "849730083434135614":
+                    if str(message.author.id) == str(i) and str(message.channel.id) not in restricted:
                         await message.add_reaction('<:upvote:385300941118898176>')
                         await message.add_reaction('<:downvote:385300951139090434>')
-        
-    # adds image to directory
-    if message.content.startswith('/addMcJob'):
 
-        if message.attachments:
+    await client.process_commands(message)
 
-            for attach in message.attachments:
-
-                storage = f"{str(random.randint(1,1000))}{str(random.randint(1,10000))}{attach.filename}"
-
-                await attach.save(f"/home/rive/bot/exploitables/tba/{storage}")
-
-            await message.channel.send(f'Your exploitable has been added. Filename: {storage}.')
-            
-        else:
-            await message.channel.send('Please add an attachment.')
-    
-    # returns said image from directory.
-    if message.content.startswith('/exploitable'):
-        dirListing = os.listdir('/home/rive/bot/exploitables/tba/')
-
-        if len(dirListing) == 0:
-            await message.channel.send('The exploitable directory is currently empty.')
-            return
-        
-        with open(str('/home/rive/bot/exploitables/tba/' + random.choice(dirListing)),'rb') as f:
-
-            picture = discord.File(f)
-            await message.channel.send('Here is your exploitable:')
-            await message.channel.send(file=picture)
-    
-    # will add the afflicted user to the unfun list
-    if message.content.startswith('/addUser'):
-
-       try:
-           if str(message.mentions[0].id) == str(client.user.id):
-                await message.channel.send('Don\'t even think about it.')
-                return
-            
-           with open("users.txt", 'r+') as f:
-                a = f.read()
-                b = a.split()
-                for i in b:
-                    if str(i) == str(message.mentions[0].id):
-                        await message.channel.send('User already added.')
-                        return
-
-                f.write(f"{str(message.mentions[0].id)}\n")
-
-           await message.channel.send(f"The user {message.mentions[0]} Added.")
-
-       except IndexError:
-           await message.channel.send('Please @ mention the user.')
-
-    # remove a user from reddit mode.
-    if message.content.startswith('/removeUser'):
-        
-        try:            
-            with open("users.txt", "r") as f:
-                lines = f.readlines()
-            
-            with open("users.txt", "w") as f:
-                check = False
-                for line in lines:
-                    if line.strip("\n") != str(message.mentions[0].id):
-                        f.write(line)
-                    else:
-                        check = True
-
-                if check:
-                    await message.channel.send(f'The user {message.mentions[0]} has been removed.')
-                else:
-                    await message.channel.send('Please remove a valid user.')
-            
-            # HOLY CRAP! only do this on small servers
-
-        except IndexError:
-            await message.channel.send('Please @ mention the user to remove.')
 
 keepAlive()
 client.run(os.getenv('TOKEN'))
