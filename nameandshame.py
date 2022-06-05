@@ -86,12 +86,7 @@ async def on_message(message):
 
     # enables / disables reddit mode
     if message.content.startswith('/reddit'):
-
-        with open("users.txt", "r") as f:
-
-            a = f.read()
-            b = a.split()
-
+        
         with open("redditMode.txt", "r+") as f:
             
             find = f.read()
