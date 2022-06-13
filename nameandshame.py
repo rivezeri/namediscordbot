@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from discord.ext import commands, tasks
 from keepalive import keepAlive
 from discord import Spotify
+from discord.utils import get
 
 
 load_dotenv()
@@ -28,7 +29,20 @@ async def on_ready():
 
         f.write(str(members))
 
-    
+# construction zone
+@client.event
+async def on_voice_state_update(member, before, after):
+    with open("mainvc.txt", 'r+') as f:
+        a = f.read()
+        b = a.split()
+
+        role = get(member.guild.roles, name='vc')
+
+        if member.voice and member.voice.channel and str(member.voice.channel.id) in b:
+            await member.add_roles(role)
+        else:
+            await member.remove_roles(role)
+
 @client.event
 async def on_member_update(before, after):
     
@@ -80,6 +94,30 @@ async def on_member_update(before, after):
 
             await channel.send(random.choice(messages))
 
+# construction zone
+@commands.guild_only()
+@client.command()
+async def setVC(ctx):
+    '''Sets a main vc.'''
+
+    try:
+
+        with open("mainvc.txt", 'r+') as f:
+            a = f.read()
+            b = a.split()
+            for i in b:
+                if str(i) == str(ctx.author.voice.channel.id):
+                    await ctx.send('Voice channel already set.')
+                    return
+
+            f.write(f"{str(ctx.author.voice.channel.id)}\n")
+
+        await ctx.send(f"The channel '{ctx.author.voice.channel}' Added.")
+
+    except IndexError:
+        await ctx.send('Please @ mention the user.')
+
+@commands.guild_only()
 @client.command()
 async def reddit(ctx):
     
@@ -102,7 +140,7 @@ async def reddit(ctx):
             
             await ctx.send('Reddit mode has been *enabled*.')
 
-
+@commands.guild_only()
 @client.command()
 async def setMain(ctx):
     
@@ -113,7 +151,7 @@ async def setMain(ctx):
 
     await ctx.send('Broadcasts will now be sent in this channel.')
 
-
+@commands.guild_only()
 @client.command()
 async def addMcJob(ctx):
     
@@ -133,6 +171,7 @@ async def addMcJob(ctx):
         await ctx.send('Please add an attachment.')
 
 
+@commands.guild_only()
 @client.command()
 async def exploitable(ctx):
     
@@ -151,7 +190,7 @@ async def exploitable(ctx):
         await ctx.send('Here is your exploitable:')
         await ctx.send(file=picture)
 
-
+@commands.guild_only()
 @client.command()
 async def addRedditor(ctx):
     
@@ -180,6 +219,7 @@ async def addRedditor(ctx):
 
 
 @client.command()
+@commands.guild_only()
 async def removeRedditor(ctx):
     
     '''Cuts the Redditor from the file. Disables the function to the user.'''
@@ -209,8 +249,8 @@ async def removeRedditor(ctx):
     except IndexError:
         await ctx.send('Please @ mention the user to remove.')
 
-
 @client.command()
+@commands.guild_only()
 async def restrictChannel(ctx):
     
     '''Disallows reddit to run on the specific channel.'''
@@ -232,6 +272,35 @@ async def restrictChannel(ctx):
         await ctx.send('Please select a channel to restrict.')
 
 @client.command()
+@commands.guild_only()
+async def unsetVC(ctx):
+    '''Unsets the @vc role per main. Inverse of setVC.'''
+
+    try:
+        with open("mainvc.txt", "r") as f:
+            lines = f.readlines()
+
+        with open("mainvc.txt", "w") as f:
+            check = False
+            for line in lines:
+
+                if line.strip("\n") != str(ctx.author.voice.channel.id):
+                    f.write(line)
+
+                else:
+                    check = True
+
+            if check:
+                await ctx.send(f'The channel \'{ctx.author.voice.channel}\' has been unset.')
+
+            else:
+                await ctx.send('This voice was never set.')
+
+    except IndexError:
+        await ctx.send('Takes the current channel only.')
+
+@client.command()
+@commands.guild_only()
 async def unrestrictChannel(ctx):
     
     '''Unrestricts said channel. Inverse of above.'''
