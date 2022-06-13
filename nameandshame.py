@@ -29,7 +29,6 @@ async def on_ready():
 
         f.write(str(members))
 
-# construction zone
 @client.event
 async def on_voice_state_update(member, before, after):
     with open("mainvc.txt", 'r+') as f:
@@ -94,10 +93,10 @@ async def on_member_update(before, after):
 
             await channel.send(random.choice(messages))
 
-# construction zone
 @commands.guild_only()
 @client.command()
 async def setVC(ctx):
+
     '''Sets a main vc.'''
 
     try:
@@ -274,6 +273,7 @@ async def restrictChannel(ctx):
 @client.command()
 @commands.guild_only()
 async def unsetVC(ctx):
+
     '''Unsets the @vc role per main. Inverse of setVC.'''
 
     try:
